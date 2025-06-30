@@ -1,15 +1,16 @@
-import {Button, Checkbox, CheckboxGroup, cn, Radio, RadioGroup} from "@heroui/react";
+import {addToast, Button, Checkbox, CheckboxGroup, cn, Radio, RadioGroup} from "@heroui/react";
 import {Manifest} from "../ts/manifest_parser.ts";
 import {useCallback, useEffect, useState} from "react";
 
 type SelectCategoriesToExportProps = {
-    onSubmit: (categories: string[]) => void;
+    onCancel: () => void;
     manifest: Manifest[];
+    onSubmit: (selectedCategories: number[]) => void;
 }
 
 const Templates = {
-    CLOTHING: [23, 68, 33, 68, 22],
-    ELECTRONICS: [1, 2, 3, 4, 5]
+    CLOTHING: [23, 33, 22],
+    HARDGOODS: [12, 16, 94, 8, 66, 3, 21, 2, 53, 7, 10, 9, 11, 68, 5, 6, 47, 18, 4, 31, 89, 61, 13, 88, 29, 17]
 };
 
 type Category = {
@@ -24,11 +25,6 @@ export default function SelectCategoriesToExport(props: SelectCategoriesToExport
     const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategories, setSelectedCategories] = useState(new Set<Category>());
     const [selectedTemplateRadio, setSelectedTemplateRadio] = useState<CategoryTemplate | undefined>("none" as CategoryTemplate);
-
-    useEffect(() =>
-    {
-        console.log("Selected categories changed:", Array.from(selectedCategories));
-    }, [selectedCategories]);
 
     useEffect(() =>
     {
@@ -63,9 +59,23 @@ export default function SelectCategoriesToExport(props: SelectCategoriesToExport
         }
     }, [categories, selectedCategories]);
 
+    const submit = useCallback(() =>
+    {
+        if (selectedCategories.size === 0)
+        {
+            addToast({
+                title: "No categories selected",
+                description: "Please select at least one category to export.",
+                color: "danger"
+            });
+            return;
+        }
+        props.onSubmit(Array.from(selectedCategories).map(c => c.id));
+    }, [selectedCategories]);
+
     return (
         <div className={"flex flex-col p-4 gap-4 w-full"} data-tauri-drag-region="">
-            <div className={"bg-foreground/5 p-2 rounded mb-4 w-fit"} data-tauri-drag-region="">
+            <div className={"bg-foreground/5 p-2 rounded mb-4"} data-tauri-drag-region="">
                 <RadioGroup
                     data-tauri-drag-region=""
                     orientation={"horizontal"}
@@ -88,7 +98,6 @@ export default function SelectCategoriesToExport(props: SelectCategoriesToExport
                 </RadioGroup>
             </div>
             <CheckboxGroup
-                data-tauri-drag-region=""
                 className={"overflow-y-auto"}
                 classNames={{
                     base: "flex flex-row gap-2",
@@ -134,8 +143,8 @@ export default function SelectCategoriesToExport(props: SelectCategoriesToExport
                     )
                 }
             >
-                <Button radius={"full"} color={"primary"}>Save</Button>
-                <Button radius={"full"} color={"danger"} variant={"light"}>Reset</Button>
+                <Button radius={"full"} color={"primary"} onPress={submit}>Save</Button>
+                <Button radius={"full"} color={"danger"} variant={"light"} onPress={props.onCancel}>Reset</Button>
             </div>
         </div>
     );
