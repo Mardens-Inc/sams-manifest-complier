@@ -1,6 +1,6 @@
 use anyhow::Result;
-use serde::{Deserialize, Serialize};
 use csv::ReaderBuilder;
+use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -25,28 +25,7 @@ pub struct Manifest {
     pub liquidation_price: f32,
 }
 
-#[tauri::command]
-pub async fn parse_manifest_from_path_command(
-    paths: Vec<String>,
-) -> std::result::Result<String, String> {
-    if paths.is_empty() {
-        return Err("No file path provided".to_string());
-    }
-    let mut table: Vec<Manifest> = vec![];
-    for path in paths {
-        match parse_file_from_path(&path) {
-            Ok(items) => {
-                table.extend(items);
-            }
-            Err(e) => return Err(format!("Error parsing file {}: {}", path, e)),
-        }
-    }
-
-    let json = serde_json::to_string(&table).map_err(|e| e.to_string())?;
-    Ok(json)
-}
-
-fn parse_file_from_path(path: &str) -> Result<Vec<Manifest>> {
+pub(crate) fn parse_file_from_path(path: &str) -> Result<Vec<Manifest>> {
     use std::fs;
 
     let contents = fs::read_to_string(path)?;
@@ -73,7 +52,7 @@ fn parse_file_from_path(path: &str) -> Result<Vec<Manifest>> {
             // Collect CSV data until we hit "Total"
             let mut csv_data = String::new();
             let mut header_added = false;
-            
+
             while i < lines.len() {
                 let current_line = lines[i].trim();
 
@@ -87,7 +66,7 @@ fn parse_file_from_path(path: &str) -> Result<Vec<Manifest>> {
                         csv_data.push_str("row,Description,ItemNumber,UPC Number,Category,Category description,Qty,Retail per item (USD$),Liquidation rate %,Liquidation price (USD$)\n");
                         header_added = true;
                     }
-                    
+
                     // Clean and add the data row
                     let cleaned_line = clean_csv_line(current_line);
                     csv_data.push_str(&cleaned_line);
@@ -126,21 +105,19 @@ fn parse_csv_data(csv_data: &str) -> Result<Vec<Manifest>> {
 
     for result in reader.records() {
         let record = result?;
-        
+
         if record.len() >= 10 {
             // Skip row number (index 0) and parse the rest
             let description = record.get(1).unwrap_or("").to_string();
             let item_number = record.get(2).unwrap_or("").to_string();
             let upc_number = record.get(3).unwrap_or("").to_string();
-            
-            let category = record.get(4).unwrap_or("0")
-                .parse::<u8>().unwrap_or(0);
-            
+
+            let category = record.get(4).unwrap_or("0").parse::<u8>().unwrap_or(0);
+
             let category_description = record.get(5).unwrap_or("").to_string();
-            
-            let quantity = record.get(6).unwrap_or("0")
-                .parse::<f32>().unwrap_or(0.0);
-            
+
+            let quantity = record.get(6).unwrap_or("0").parse::<f32>().unwrap_or(0.0);
+
             let retail_per_item = parse_currency_field(record.get(7).unwrap_or("0"));
             let liquidation_rate = parse_percentage_field(record.get(8).unwrap_or("0"));
             let liquidation_price = parse_currency_field(record.get(9).unwrap_or("0"));
