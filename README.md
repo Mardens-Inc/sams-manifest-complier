@@ -214,7 +214,9 @@ Drew Chase
 
 ## 🎥 Demo Video
 
-![Application Demo](screenshots/demo-2.mp4)
+https://github.com/user-attachments/assets/481849ce-46a0-4247-9908-31d1e4822fd2
+
+
 
 ---
 
