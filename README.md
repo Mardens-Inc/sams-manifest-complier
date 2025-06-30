@@ -214,7 +214,7 @@ Drew Chase
 
 ## 🎥 Demo Video
 
-[Application Demo](screenshots/demo.mp4)
+![Application Demo](screenshots/demo.mp4)
 
 ---
 
