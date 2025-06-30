@@ -1,6 +1,6 @@
 import DragDropArea from "../components/DragDropArea.tsx";
-import {useEffect, useState} from "react";
-import {getManifestFromFiles, Manifest} from "../ts/manifest_parser.ts";
+import {useCallback, useEffect, useState} from "react";
+import {getManifestFromFiles, Manifest, saveNewManifest} from "../ts/manifest_parser.ts";
 import SelectCategoriesToExport from "../components/SelectCategoriesToExport.tsx";
 
 export default function Home()
@@ -13,16 +13,27 @@ export default function Home()
         getManifestFromFiles(files).then(setManifest);
     }, [files]);
 
+    const trySaveNewManifest = useCallback(async (selectedCategories: number[]) =>
+    {
+        await saveNewManifest(selectedCategories, files);
+    }, [files]);
+
+    const reset = useCallback(() =>
+    {
+        setFiles([]);
+        setManifest([]);
+    }, [setFiles, setManifest]);
+
     if (files.length === 0)
     {
         return <DragDropArea onFileSelected={setFiles}/>;
     } else if (manifest.length > 0)
     {
-        return <SelectCategoriesToExport manifest={manifest} onSubmit={(categories) =>
-        {
-            // Handle the selected categories for export
-            console.log("Selected categories for export:", categories);
-        }}/>;
+        return <SelectCategoriesToExport
+            manifest={manifest}
+            onSubmit={trySaveNewManifest}
+            onCancel={reset}
+        />;
 
     }
 
