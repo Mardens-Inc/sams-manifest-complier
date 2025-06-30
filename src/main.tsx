@@ -27,7 +27,7 @@ export function MainContentRenderer()
     return (
         <HeroUIProvider navigate={navigate}>
             <ToastProvider
-                placement={"bottom-center"}
+                placement={"bottom-right"}
                 toastProps={{
                     shouldShowTimeoutProgress: true,
                     timeout: 3000,
