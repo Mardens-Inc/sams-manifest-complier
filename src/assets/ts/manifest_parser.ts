@@ -1,5 +1,6 @@
 import {invoke} from "@tauri-apps/api/core";
 import {addToast} from "@heroui/react";
+import {save} from "@tauri-apps/plugin-dialog";
 
 export type Manifest = {
     description: string;
@@ -44,5 +45,50 @@ export async function getManifestFromFiles(file_paths: string[]): Promise<Manife
             timeout: 5000
         });
         return [];
+    }
+}
+
+export async function saveNewManifest(selectedCategories: number[], files: string[])
+{
+    if (selectedCategories.length === 0)
+    {
+        addToast({
+            title: "No categories selected",
+            description: "Please select at least one category to export.",
+            color: "danger"
+        });
+        return;
+    }
+    const output = await save({
+        title: "Save Manifest",
+        filters: [{
+            name: "CSV File",
+            extensions: ["csv"]
+        }],
+        canCreateDirectories: true
+    });
+    if (!output)
+    {
+        addToast({
+            title: "Save cancelled",
+            description: "No file was selected.",
+            color: "warning"
+        });
+        return;
+    }
+    const error_message: string | null = await invoke("build_new_manifest_from_paths_with_categories", {
+        paths: files,
+        categories: selectedCategories,
+        output: output
+    });
+
+    if (typeof error_message === "string" && error_message.length > 0)
+    {
+        // an error occurred
+        addToast({
+            title: "Error",
+            description: error_message,
+            color: "danger"
+        });
     }
 }
