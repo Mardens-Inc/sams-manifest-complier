@@ -101,6 +101,7 @@ export default function DragDropArea(props: DragDropAreaProps)
                     "data-[dragover=true]:bg-primary/10 data-[dragover=true]:border-primary"
                 )
             }
+            data-tauri-drag-region=""
             animate={{opacity: isUnloadingComponent ? 0 : 1, y: isUnloadingComponent ? 40 : 0}}
             transition={{duration: 0.5, type: "spring"}}
             initial={{opacity: 0, y: 40}}
