@@ -9,8 +9,8 @@ type SelectCategoriesToExportProps = {
 }
 
 const Templates = {
-    CLOTHING: [23, 33, 22],
-    HARDGOODS: [12, 16, 94, 8, 66, 3, 21, 2, 53, 7, 10, 9, 11, 68, 5, 6, 47, 18, 4, 31, 89, 61, 13, 88, 29, 17]
+    CLOTHING: [22,23,33,34,68,95],
+    HARDGOODS: [12, 16, 94, 8, 66, 3, 21, 2, 53, 7, 10, 9, 11, 5, 6, 47, 18, 4, 31, 89, 61, 13, 88, 29, 17]
 };
 
 type Category = {
